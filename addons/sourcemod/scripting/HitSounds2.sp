@@ -25,7 +25,7 @@ bool g_bLate = false;
 public Plugin myinfo = 
 {
 	name        = "HitSounds v2",
-	author      = "koen (Original: nano, maxime1907)",
+	author      = "koen, tilgep (Original: nano, maxime1907)",
 	description = "Play hitsounds when shooting at entities or other players",
 	version     = "2.0",
 	url         = "https://steamcommunity.com/id/fungame1224/"
@@ -152,7 +152,7 @@ public Action Command_Vol(int client, int args)
 /* ---------------[ Client Menu ]--------------- */
 public void CookieMenu_HitMarker(int client, CookieMenuAction action, any info, char[] buffer, int maxlen)
 {
-	switch(action)
+	switch (action)
 	{
 		case CookieMenuAction_SelectOption:
 		{
@@ -174,7 +174,7 @@ public void DisplayCookieMenu(int client)
 
 public int MenuHandler_HitMarker(Menu menu, MenuAction action, int param1, int param2)
 {
-	switch(action)
+	switch (action)
 	{
 		case MenuAction_End:
 		{
