@@ -1,6 +1,9 @@
 # HitSounds
 SourceMod plugin for playing hitsounds. **Made and tested for CS:GO only!** I have not tested other games so no comment on compatability.
 
+# Normal vs Lite?
+Normal version has 3 different sounds for zombies and then one for bosses. Unfortunately, this is still a WIP where I intend on adding option to change hitsounds to your liking, but for now, you'll have to use `_Lite` version if you only want one sound *(make sure to modify the source code to the sound you wish relative to sourcemod folder!)*
+
 *Note: Compiled in `SM 1.11.6882`*
 
 # Features:
