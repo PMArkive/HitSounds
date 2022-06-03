@@ -1,0 +1,31 @@
+"Phrases"
+{
+	"Prefix"
+	{
+		"en"		"{red}[HitSounds]{default}"
+	}
+	
+	"Command Usage"
+	{
+		"#format"	"{1:t}"
+		"en"		"{1} Command Input: sm_hsvol <0.0 - 1.0>"
+	}
+	
+	"Volume Change"
+	{
+		"#format"	"{1:t},{2:.1f}"
+		"en"		"{1} Hit sound volume changed to {green}{2}"
+	}
+	
+	"Min Limit"
+	{
+		"#format"	"{1:t}"
+		"en"		"{1} Minimum hit sound volume: {green}0.0"
+	}
+	
+	"Max Limit"
+	{
+		"#format"	"{1:t}"
+		"en"		"{1} Maximum hit sound volume: {green}1.0"
+	}
+}
