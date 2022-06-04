@@ -7,12 +7,14 @@
 #include <csgocolors_fix>
 #include <clientprefs>
 
+Handle g_hDetailedHitsounds = INVALID_HANDLE;
 Handle g_hHearSound = INVALID_HANDLE;
 Handle g_hVolume = INVALID_HANDLE;
 
 #define DEFAULT_VOLUME 0.5
 float g_fHitVolumeSound[MAXPLAYERS+1] = {DEFAULT_VOLUME, ...};
 bool g_bHearSound[MAXPLAYERS+1] = {false, ...};
+bool g_bDetailedHitsound[MAXPLAYERS+1] = {false, ...};
 
 // Hitsound File Paths (Hardcoded for now... Will be changed to CVar)
 #define SND_PATH_HITBOSS "hitmarker/hitmarker.mp3"
@@ -27,7 +29,7 @@ public Plugin myinfo =
 	name        = "HitSounds v2",
 	author      = "koen, tilgep (Original: nano, maxime1907)",
 	description = "Play hitsounds when shooting at entities or other players",
-	version     = "2.0",
+	version     = "2.1",
 	url         = "https://steamcommunity.com/id/fungame1224/"
 };
 
@@ -45,6 +47,7 @@ public void OnPluginStart()
 	// Client cookies
 	g_hHearSound = RegClientCookie("hitmarker_sound", "Enable/Disable hitmarker sound effect", CookieAccess_Private);
 	g_hVolume = RegClientCookie("hitsound_volume", "Volume of hitsound", CookieAccess_Private);
+	g_hDetailedHitsounds = RegClientCookie("hitsound_advanced", "Hitsound style", CookieAccess_Private);
 
 	// Add HitSound menu to !settings cookie menu
 	SetCookieMenuItem(CookieMenu_HitMarker, INVALID_HANDLE, "Hit Sound Settings");
@@ -63,6 +66,7 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_hitsound", Command_HitMarker, "Bring up Hitsound Settings Menu");
 	RegConsoleCmd("sm_hitsounds", Command_HitMarker, "Bring up Hitsound Settings Menu");
 	RegConsoleCmd("sm_hsvol", Command_Vol, "Change hitsound volume");
+	RegConsoleCmd("sm_hitsoundstyle", Command_Style, "Toggle between simple and detailed hitsounds");
 
 	AutoExecConfig(true);
 
@@ -149,6 +153,13 @@ public Action Command_Vol(int client, int args)
 	return Plugin_Continue;
 }
 
+public Action Command_Style(int client, int args)
+{
+	g_bDetailedHitsound[client] = !g_bDetailedHitsound[client];
+	CPrintToChat(client, "%t", "Detailed Hitsound Toggle", "Prefix", g_bDetailedHitsound[client] ? "{green}enabled" : "{red}disabled");
+	return Plugin_Handled;
+}
+
 /* ---------------[ Client Menu ]--------------- */
 public void CookieMenu_HitMarker(int client, CookieMenuAction action, any info, char[] buffer, int maxlen)
 {
@@ -166,8 +177,9 @@ public void DisplayCookieMenu(int client)
 	Menu menu = new Menu(MenuHandler_HitMarker, MENU_ACTIONS_DEFAULT | MenuAction_DisplayItem);
 	menu.ExitBackButton = true;
 	menu.ExitButton = true;
-	SetMenuTitle(menu, "Hit Sound Settings");
+	SetMenuTitle(menu, "Hit Sound Settings:");
 	AddMenuItem(menu, NULL_STRING, "Hear a sound effect");
+	AddMenuItem(menu, "detailed", "Toggle detailed hitounds");
 	AddMenuItem(menu, "vol", "Change volume of hitsound");
 	DisplayMenu(menu, client, MENU_TIME_FOREVER);
 }
@@ -194,6 +206,10 @@ public int MenuHandler_HitMarker(Menu menu, MenuAction action, int param1, int p
 				}
 				case 1:
 				{
+					g_bDetailedHitsound[param1] = !g_bDetailedHitsound[param1];
+				}
+				case 2:
+				{
 					g_fHitVolumeSound[param1] = g_fHitVolumeSound[param1] - 0.1;
 					if (g_fHitVolumeSound[param1] <= 0.0) g_fHitVolumeSound[param1] = 1.0; 
 					DisplayCookieMenu(param1);
@@ -212,6 +228,10 @@ public int MenuHandler_HitMarker(Menu menu, MenuAction action, int param1, int p
 					Format(sBuffer, sizeof(sBuffer), "Hitsounds: %s", g_bHearSound[param1] ? "Enabled" : "Disabled");
 				}
 				case 1:
+				{
+					Format(sBuffer, sizeof(sBuffer), "Detailed Hitsound: %s", g_bDetailedHitsound[param1] ? "Enabled" : "Disabled");
+				}
+				case 2:
 				{
 					Format(sBuffer, sizeof(sBuffer), "Hitsound Volume: %.2f", g_fHitVolumeSound[param1]);
 				}
@@ -243,12 +263,15 @@ public void Hook_EventOnDamage(Event event, const char[] name, bool dontBroadcas
 	
 	if (g_bHearSound[iAttacker] && g_fHitVolumeSound[iAttacker] != 0.0)
 	{
-		if (iHP == 0)
-			EmitSoundToClient(iAttacker, SND_PATH_HITKILL, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, g_fHitVolumeSound[iAttacker]);
-		else if (iHitgroup == 1)
-			EmitSoundToClient(iAttacker, SND_PATH_HITHEAD, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, g_fHitVolumeSound[iAttacker]);
-		else
-			EmitSoundToClient(iAttacker, SND_PATH_HITBODY, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, g_fHitVolumeSound[iAttacker]);
+		if (g_bDetailedHitsound[iAttacker]) {
+			if (iHP == 0)
+				EmitSoundToClient(iAttacker, SND_PATH_HITKILL, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, g_fHitVolumeSound[iAttacker]);
+			else if (iHitgroup == 1)
+				EmitSoundToClient(iAttacker, SND_PATH_HITHEAD, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, g_fHitVolumeSound[iAttacker]);
+			else
+				EmitSoundToClient(iAttacker, SND_PATH_HITBODY, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, g_fHitVolumeSound[iAttacker]);
+		}
+		else EmitSoundToClient(iAttacker, SND_PATH_HITBOSS, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, g_fHitVolumeSound[iAttacker]);
 	}
 }
 
@@ -290,6 +313,9 @@ public void ReadClientCookies(int client)
 {
 	char sValue[8];
 
+	GetClientCookie(client, g_hDetailedHitsounds, sValue, sizeof(sValue));
+	g_bDetailedHitsound[client] = (sValue[0] == '\0' ? true : StringToInt(sValue) == 1);
+
 	GetClientCookie(client, g_hHearSound, sValue, sizeof(sValue));
 	g_bHearSound[client] = (sValue[0] == '\0' ? true : StringToInt(sValue) == 1);
 
@@ -301,6 +327,9 @@ public void ReadClientCookies(int client)
 public void SetClientCookies(int client)
 {
 	char sValue[8];
+
+	Format(sValue, sizeof(sValue), "%i", g_bDetailedHitsound[client]);
+	SetClientCookie(client, g_hDetailedHitsounds, sValue);
 
 	Format(sValue, sizeof(sValue), "%i", g_bHearSound[client]);
 	SetClientCookie(client, g_hHearSound, sValue);

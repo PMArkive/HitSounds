@@ -28,4 +28,10 @@
 		"#format"	"{1:t}"
 		"en"		"{1} Maximum hit sound volume: {green}1.0"
 	}
+	
+	"Detailed Hitsound Toggle"
+	{
+		"#format"	"{1:t},{2:s}"
+		"en"		"{1} Detailed hitsounds is now {2}"
+	}
 }

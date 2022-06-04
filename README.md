@@ -19,3 +19,16 @@ Normal version has 3 different sounds for zombies and then one for bosses. Unfor
 # Credits:
 - [Original plugin by nano/maxim1907](https://gitlab.com/counterstrikesource/sm-plugins/hitmarker)
 - [tilgep](https://steamcommunity.com/id/tilgep/) for adding `sm_hsvol` feature
+
+# Changelogs
+## Version 1
+- Port from CSS and removed all hitmarkers related files and code
+- Added `sm_hsvol` and volume control to plugin
+## Version 2
+- **2.0**
+    - Added multiple sound files for different hitgroups and kills
+    - Moved plugin messages to a translation file
+- **2.0 Lite**
+    - Revert back to old plugin with just 1 hitsound *(CoD Hitmarker)*
+- **2.1**
+    - Added client option to toggle between detailed and simple hitsound modes
