@@ -7,12 +7,14 @@
 #include <csgocolors_fix>
 #include <clientprefs>
 
+Handle g_hBossHitsounds = INVALID_HANDLE;
 Handle g_hDetailedHitsounds = INVALID_HANDLE;
 Handle g_hHearSound = INVALID_HANDLE;
 Handle g_hVolume = INVALID_HANDLE;
 
 #define DEFAULT_VOLUME 0.5
 float g_fHitVolumeSound[MAXPLAYERS+1] = {DEFAULT_VOLUME, ...};
+bool g_bBossHitsound[MAXPLAYERS+1] = {false, ...};
 bool g_bHearSound[MAXPLAYERS+1] = {false, ...};
 bool g_bDetailedHitsound[MAXPLAYERS+1] = {false, ...};
 
@@ -29,7 +31,7 @@ public Plugin myinfo =
 	name        = "HitSounds v2",
 	author      = "koen, tilgep (Original: nano, maxime1907)",
 	description = "Play hitsounds when shooting at entities or other players",
-	version     = "2.1",
+	version     = "2.2",
 	url         = "https://steamcommunity.com/id/fungame1224/"
 };
 
@@ -45,6 +47,7 @@ public void OnPluginStart()
 	LoadTranslations("hitsounds.phrases");
 	
 	// Client cookies
+	g_hBossHitsounds = RegClientCookie("hitmarker_boss_hitsound", "Enable/Disable boss hitmarker sounds", CookieAccess_Private);
 	g_hHearSound = RegClientCookie("hitmarker_sound", "Enable/Disable hitmarker sound effect", CookieAccess_Private);
 	g_hVolume = RegClientCookie("hitsound_volume", "Volume of hitsound", CookieAccess_Private);
 	g_hDetailedHitsounds = RegClientCookie("hitsound_advanced", "Hitsound style", CookieAccess_Private);
@@ -178,7 +181,8 @@ public void DisplayCookieMenu(int client)
 	menu.ExitBackButton = true;
 	menu.ExitButton = true;
 	SetMenuTitle(menu, "Hit Sound Settings:");
-	AddMenuItem(menu, NULL_STRING, "Hear a sound effect");
+	AddMenuItem(menu, "zombie", "Toggle zombie hitsounds");
+	AddMenuItem(menu, "boss", "Toggle boss hitsounds");
 	AddMenuItem(menu, "detailed", "Toggle detailed hitounds");
 	AddMenuItem(menu, "vol", "Change volume of hitsound");
 	DisplayMenu(menu, client, MENU_TIME_FOREVER);
@@ -206,9 +210,13 @@ public int MenuHandler_HitMarker(Menu menu, MenuAction action, int param1, int p
 				}
 				case 1:
 				{
-					g_bDetailedHitsound[param1] = !g_bDetailedHitsound[param1];
+					g_bBossHitsound[param1] = !g_bBossHitsound[param1];
 				}
 				case 2:
+				{
+					g_bDetailedHitsound[param1] = !g_bDetailedHitsound[param1];
+				}
+				case 3:
 				{
 					g_fHitVolumeSound[param1] = g_fHitVolumeSound[param1] - 0.1;
 					if (g_fHitVolumeSound[param1] <= 0.0) g_fHitVolumeSound[param1] = 1.0; 
@@ -225,13 +233,17 @@ public int MenuHandler_HitMarker(Menu menu, MenuAction action, int param1, int p
 			{
 				case 0:
 				{
-					Format(sBuffer, sizeof(sBuffer), "Hitsounds: %s", g_bHearSound[param1] ? "Enabled" : "Disabled");
+					Format(sBuffer, sizeof(sBuffer), "Zombie Hitsounds: %s", g_bHearSound[param1] ? "Enabled" : "Disabled");
 				}
 				case 1:
 				{
-					Format(sBuffer, sizeof(sBuffer), "Detailed Hitsound: %s", g_bDetailedHitsound[param1] ? "Enabled" : "Disabled");
+					Format(sBuffer, sizeof(sBuffer), "Boss Hitsounds: %s", g_bBossHitsound[param1] ? "Enabled" : "Disabled");
 				}
 				case 2:
+				{
+					Format(sBuffer, sizeof(sBuffer), "Detailed Hitsound: %s", g_bDetailedHitsound[param1] ? "Enabled" : "Disabled");
+				}
+				case 3:
 				{
 					Format(sBuffer, sizeof(sBuffer), "Hitsound Volume: %.2f", g_fHitVolumeSound[param1]);
 				}
@@ -247,7 +259,7 @@ public void Hook_EntityOnDamage(const char[] output, int caller, int activator, 
 {
 	if (!IsValidClient(activator)) return;
 	
-	if (g_bHearSound[activator] && g_fHitVolumeSound[activator] != 0.0)
+	if (g_bBossHitsound[activator] && g_fHitVolumeSound[activator] != 0.0)
 		EmitSoundToClient(activator, SND_PATH_HITBOSS, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, g_fHitVolumeSound[activator]);
 }
 
@@ -312,6 +324,9 @@ stock void PrecacheSounds()
 public void ReadClientCookies(int client)
 {
 	char sValue[8];
+	
+	GetClientCookie(client, g_hBossHitsounds, sValue, sizeof(sValue));
+	g_bBossHitsound[client] = (sValue[0] == '\0' ? true: StringToInt(sValue) == 1);
 
 	GetClientCookie(client, g_hDetailedHitsounds, sValue, sizeof(sValue));
 	g_bDetailedHitsound[client] = (sValue[0] == '\0' ? true : StringToInt(sValue) == 1);
@@ -327,6 +342,9 @@ public void ReadClientCookies(int client)
 public void SetClientCookies(int client)
 {
 	char sValue[8];
+
+	Format(sValue, sizeof(sValue), "%i", g_bBossHitsound[client]);
+	SetClientCookie(client, g_hDetailedHitsounds, sValue);
 
 	Format(sValue, sizeof(sValue), "%i", g_bDetailedHitsound[client]);
 	SetClientCookie(client, g_hDetailedHitsounds, sValue);

@@ -32,3 +32,5 @@ Normal version has 3 different sounds for zombies and then one for bosses. Unfor
     - Revert back to old plugin with just 1 hitsound *(CoD Hitmarker)*
 - **2.1**
     - Added client option to toggle between detailed and simple hitsound modes
+- **2.2**
+    - Added client option to toggle boss hitsounds
