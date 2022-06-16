@@ -34,3 +34,5 @@ Normal version has 3 different sounds for zombies and then one for bosses. Unfor
     - Added client option to toggle between detailed and simple hitsound modes
 - **2.2**
     - Added client option to toggle boss hitsounds
+- **2.2.1**
+    - Fix cookie bug

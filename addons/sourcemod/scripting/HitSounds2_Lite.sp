@@ -24,7 +24,7 @@ public Plugin myinfo =
 	name        = "HitSounds v2 Lite",
 	author      = "koen, tilgep (Original: nano, maxime1907)",
 	description = "Play hitsounds when shooting at entities or other players",
-	version     = "2.0",
+	version     = "2.2.1",
 	url         = "https://steamcommunity.com/id/fungame1224/"
 };
 
@@ -68,7 +68,7 @@ public void OnPluginStart()
 	{
 		for (int i = 1; i <= MaxClients; i++)
 		{
-			if (IsClientConnected(i)) OnClientPutInServer(i);
+			if (IsClientConnected(i) && AreClientCookiesCached(i)) OnClientCookiesCached(i);
 		}
 	}
 }
@@ -88,11 +88,6 @@ public void OnPluginEnd()
 public void OnMapStart()
 {
 	PrecacheSounds();
-}
-
-public void OnClientPutInServer(int client)
-{
-	if (AreClientCookiesCached(client)) ReadClientCookies(client);
 }
 
 public void OnClientDisconnect(int client)
